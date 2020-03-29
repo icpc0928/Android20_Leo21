@@ -2,7 +2,15 @@ package tw.org.iii.leo.leo21;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import android.Manifest;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -18,16 +26,35 @@ public class MainActivity extends AppCompatActivity {
 
     private WebView webView;
     private EditText max;
+    private LocationManager lmgr;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    123);
+        }else{
+            init();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    private void init(){
+        lmgr = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
         webView = findViewById(R.id.webView);
         max = findViewById(R.id.max);
-
-        initWebView();
-    }
+            initWebView();
+        }
 
     private void initWebView(){
         webView.setWebViewClient(new WebViewClient());
@@ -47,6 +74,44 @@ public class MainActivity extends AppCompatActivity {
 //        webView.loadUrl("https://www.iii.org.tw");
         webView.loadUrl("file:///android_asset/leo.html");
 
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        myListener = new MyListener();
+                                    //用gps ,幾毫秒更新一次,移動多遠,地點監聽 紅線是因為要求你要檢查權限 但我們已經有惹所以不理他
+        lmgr.requestLocationUpdates(LocationManager.GPS_PROVIDER
+        ,0,0,myListener);
+    }
+
+    private MyListener myListener;
+    private class MyListener implements LocationListener{
+        @Override
+        public void onLocationChanged(Location location) {
+
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        lmgr.removeUpdates(myListener);
     }
 
     @Override
