@@ -1,12 +1,14 @@
 package tw.org.iii.leo.leo21;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -14,6 +16,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.webkit.JavascriptInterface;
@@ -50,11 +53,27 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void init(){
+
+
         lmgr = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+
+        if (!lmgr.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+            Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+            startActivityForResult(intent,123);
+        }
+
         webView = findViewById(R.id.webView);
         max = findViewById(R.id.max);
             initWebView();
         }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (!lmgr.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            Log.v("leo", "NOGPS");
+        }
+    }
 
     private void initWebView(){
         webView.setWebViewClient(new WebViewClient());
@@ -74,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
 //        webView.loadUrl("https://www.iii.org.tw");
         webView.loadUrl("file:///android_asset/leo.html");
 
-    }
+}
 
     @Override
     protected void onStart() {
@@ -89,7 +108,10 @@ public class MainActivity extends AppCompatActivity {
     private class MyListener implements LocationListener{
         @Override
         public void onLocationChanged(Location location) {
-
+           double lat =  location.getLatitude();
+           double lng =  location.getLongitude();
+           Log.v("leo",lat+", "+ lng);
+           webView.loadUrl(String.format("javascript:moveTo(%f,%f)",lat,lng));
         }
 
         @Override
