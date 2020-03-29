@@ -13,27 +13,39 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         >
-        <Button
+        <EditText
+            android:id="@+id/max"
+            android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="test1"
-            android:onClick="test1"
+            android:inputType="number"
+
             />
-        <Button
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="test2"
-            android:onClick="test2"
-            />
-        <Button
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="test2"
-            android:onClick="test2"
-            />
+
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="test1"
+                android:onClick="test1"
+                />
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="test2"
+                android:onClick="test2"
+                />
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="test2"
+                android:onClick="test2"
+                />
+
+
+
 
 
     </LinearLayout>

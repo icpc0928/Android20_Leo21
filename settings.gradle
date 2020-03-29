@@ -1,0 +1,2 @@
+rootProject.name='Leo21'
+include ':app'
