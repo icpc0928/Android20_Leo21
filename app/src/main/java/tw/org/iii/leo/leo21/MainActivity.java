@@ -25,11 +25,22 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.EditText;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 public class MainActivity extends AppCompatActivity {
 
     private WebView webView;
     private EditText max;
     private LocationManager lmgr;
+    private RequestQueue queue;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +64,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void init(){
+
+        queue = Volley.newRequestQueue(this);
 
 
         lmgr = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
@@ -105,13 +118,61 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private MyListener myListener;
+
+
+    //經緯度 按鈕
+    public void test2(View view) {
+        String url = "https://maps.googleapis.com/maps/api/geocode/json?address="+
+                "%s"+"&key=AIzaSyCLk8W31pUZyUEwd2z6Wzld99iipFvo85Y";
+        String url2 = String.format(url,max.getText().toString());
+        StringRequest request = new StringRequest(
+                Request.Method.GET,
+                url2,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        parseJSON(response);
+                    }
+                },
+                null
+        );
+        queue.add(request);
+    }
+
+    private void parseJSON(String json){
+        try{
+            JSONObject root = new JSONObject(json);
+            String status = root.getString("status");
+            if(status.equals("OK")){
+                JSONArray results = root.getJSONArray("results");
+                JSONObject result = results.getJSONObject(0);
+                JSONObject geometry = result.getJSONObject("geometry");
+                JSONObject location = geometry.getJSONObject("location");
+                double lat = location.getDouble("lat");
+                double lng = location.getDouble("lng");
+                Log.v("leo","geocoding => " + lat +" , "+ lng);
+                webView.loadUrl(String.format("javascript:moveTo(%f,%f)",lat,lng));
+            }else{
+                Log.v("leo","status = "+ status);
+            }
+        }catch(Exception e){
+            Log.v("leo",e.toString());
+        }
+    }
+
     private class MyListener implements LocationListener{
         @Override
         public void onLocationChanged(Location location) {
            double lat =  location.getLatitude();
            double lng =  location.getLongitude();
            Log.v("leo",lat+", "+ lng);
-           webView.loadUrl(String.format("javascript:moveTo(%f,%f)",lat,lng));
+            Message message = new Message();
+            Bundle data = new Bundle();
+            data.putString("urname",lat+", "+ lng);
+            message.setData(data);
+            uiHandler.sendMessage(message);
+//             因為要秀輸入的地址所以註解掉了
+//           webView.loadUrl(String.format("javascript:moveTo(%f,%f)",lat,lng));
         }
 
         @Override
@@ -172,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
             String urname =  msg.getData().getString("urname");
-            max.setText(urname);
+//            max.setText(urname);
         }
     }
 }

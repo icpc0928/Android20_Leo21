@@ -32,8 +32,11 @@
       }
 
       function moveTo(newlat,newlng){
-        map.setCenter({lat: newlat, lng: newlng});
+        var newpos = {lat: newlat, lng: newlng}
+        map.setCenter( newpos);
         map.setZoom(17);
+        var marker = new google.maps.Marker({position: newpos ,map: map})
+<!--        第一個map是屬性名稱 第二個map是上面的物件名稱-->
         }
     </script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCLk8W31pUZyUEwd2z6Wzld99iipFvo85Y&callback=initMap"
